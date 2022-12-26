@@ -1,0 +1,127 @@
+#!/usr/bin/python2
+# -*- coding: utf-8 -*-
+from gerrit import GerritClient
+import json
+import requests
+import datetime
+import random
+
+#info
+WX_TEAM = {'cheong':'U03DEG6SUE4', 'ebjeong':'U03CWD195GS', 'cssong':'U03CAR9H1TR', 'kwpark':'U03CTGCHSG5', 'sjkim':'U03A5KAFS5A'}
+SLACK_TOKEN = 'xoxb-3336540099862-3526485015745-pGTV4P8N8kCSW0k4oRxRWSet'
+GERRIT_ID = 'cheong'
+GERRIT_PW = 'A5yzbF+Lup9odsbUnduQ64Af3wYV+YegDfypZJ5YfQ'
+
+def gerrit_client():
+        return GerritClient(base_url="http://gerrit.pentasecurity.com", username=GERRIT_ID, password=GERRIT_PW)
+
+def post_message(channel, text):
+        requests.post("https://slack.com/api/chat.postMessage", 
+        headers={"Authorization": "Bearer "+SLACK_TOKEN}, data={"channel": channel,"text": text})
+
+
+class IssueChecker:
+        def __init__(self, data=None):
+                self.client = gerrit_client()
+                if data:
+                        self.all_review = data
+                else:
+                        self.all_review = self.fetch_reviews()
+                
+
+        def fetch_reviews(self) :
+                query = ["is:open+owner:self", "is:open+reviewer:self+-owner:self"]
+                result = self.client.changes.search(query=query, options=["LABELS"])
+                total = []
+                for review in result:
+                        total += review
+                return total
+
+
+        def hashtag_reviews(self, hashtag):
+                issue_board = u" :point_right: [ 필수 리뷰 입니다. ] \n"
+
+                count = 0
+                for issue in self.all_review:
+                        if 'hashtags' in issue and hashtag in issue['hashtags']:
+                                issue_no = issue['_number']
+                                issue_subj = issue['subject']
+                                issue_board += u"<!here> <http://gerrit.pentasecurity.com/{} | {}>\n".format(issue_no, issue_subj)
+                                count += 1
+                
+                if count == 0:
+                        issue_board += u"오늘은 필수 리뷰가 없습니다."
+                                
+                return issue_board
+
+
+        def rejected_reviews(self):
+                issue_board = u" :hand: [ 리뷰가 달렸습니다 ] "
+                count = 0
+
+                for issue in self.all_review:
+                        owner = self.client.accounts.get(issue['owner']['_account_id'])
+                        labels = issue['labels']
+                        verified = labels['Verified']
+                        review = labels['Code-Review']
+                        
+                        if verified.get('blocking') or review.get('blocking') or review.get('disliked'):
+                                receive_user = WX_TEAM[str(owner).split("=")[1][:-1]]
+                                issue_board += u"<@{}> {}".format(receive_user, issue['subject'])
+                                count += 1
+                                
+                if count == 0:
+                        issue_board += u"리뷰 달린 이슈가 없습니다." 
+
+                return issue_board
+
+
+def main():
+        wx = IssueChecker()
+        post_message("#wx", wx.rejected_reviews())
+        post_message("#wx", wx.hashtag_reviews('TEST'))
+
+
+def test():
+        test_data = '''
+    [
+        {
+            "status": "NEW", 
+            "deletions": 2, 
+            "updated": "2022-09-16 02:30:37.000000000", 
+            "unresolved_comment_count": 0, 
+            "insertions": 2, 
+            "created": "2022-08-30 01:35:38.000000000", 
+            "change_id": "I3403980d2936b5bd85c5e3ef95ebce41c19ce99c", 
+            "labels": {
+                "Verified": {}, 
+                "Code-Review": {}
+            }, 
+            "hashtags": [
+                "TEST"
+            ], 
+            "total_comment_count": 0, 
+            "project": "webapi", 
+            "has_review_started": true, 
+            "submit_type": "MERGE_IF_NECESSARY", 
+            "mergeable": true, 
+            "branch": "master", 
+            "owner": {
+                "_account_id": 201
+            }, 
+            "requirements": [], 
+            "_number": 41488, 
+            "id": "webapi~master~I3403980d2936b5bd85c5e3ef95ebce41c19ce99c", 
+            "subject": "{{wits|31399}} \ud30c\uc77c \uc774\ub984\uc5d0 \uacf5\ubc31\uc774 \ub4e4\uc5b4\uac04 \ud30c\uc77c \uc5c5\ub85c\ub4dc \uc2dc, \ub2e4\uc6b4\ub85c\ub4dc/\uc0ad\uc81c\uac00 \ub418\uc9c0 \uc54a\uc74c"
+        }
+    ]
+'''
+        wx = IssueChecker(json.loads(test_data))
+        post_message("#test", wx.rejected_reviews())
+        post_message("#test", wx.hashtag_reviews('TEST'))
+
+
+if __name__ == "__main__":
+        # test()
+        main()
+
