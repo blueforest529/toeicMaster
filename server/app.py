@@ -1,22 +1,14 @@
 from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import pymysql
 import json
 from flask_restx import Api, Resource, Namespace
-from request import RequestResource
-from volt import VoltResource
+from word import Word
+from idiom import IdiomResource
+import databases
 
-# sphere = pymysql.connect(
-#     user='root', 
-#     passwd='rhdqn.', 
-#     host='127.0.0.1', 
-#     db='sphere', 
-#     charset='utf8'
-# )
 
 # configuration
-DEBUG = True
 
 # instantiate the app
 app = Flask(__name__)
@@ -24,14 +16,14 @@ CORS(app)
 api = Api(app)
 
 
-api.add_namespace(RequestResource, '/request')
-api.add_namespace(VoltResource, '/volt')
+api.add_namespace(Word, '/word')
+api.add_namespace(IdiomResource, '/idiom')
 
 # enable CORS
 #CORS(app, resources={r'/*': {'origins': '*'}})
 
-# sanity check route
-@api.route('/hello', methods=['GET'])
+
+@api.route('/hello')
 class HelloWorld(Resource):
     def get(self):  # GET 요청시 리턴 값에 해당 하는 dict를 JSON 형태로 반환
         return {"hello": "world!"}
@@ -89,5 +81,5 @@ class HelloWorld(Resource):
 #     return False
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(debug=True)
     

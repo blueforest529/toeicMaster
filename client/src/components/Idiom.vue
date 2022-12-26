@@ -101,7 +101,7 @@ export default {
       perPage: 15,
       currentPage: 1,
       fields: [
-          { key: 'word', label: '숙어'},
+          { key: 'idiom', label: '숙어'},
           { key: 'mean', label: '뜻'} 
         ],
       addBookForm: {

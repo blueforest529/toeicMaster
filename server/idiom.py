@@ -1,20 +1,17 @@
-from flask import request, jsonify
+from flask import request
 from flask_restx import Resource, Api, Namespace
 # from db_connector import DBConnector
 
-VoltResource = Namespace('VoltResource')
+IdiomResource = Namespace('IdiomResource')
 
-@VoltResource.route('')
+@IdiomResource.route('')
 class RequestDAO(Resource):
     def get(self):
-        # response_object = {'status': 'success'}
-
         # DBc = DBConnector()
-        # response_object['volt']  = DBc.select('volt')
-
-        return ''
-        # return jsonify(response_object)
+        # result = DBc.select('resource_req')
         
+        # return result
+        return ''
         
     def put(self):
         return {
