@@ -42,7 +42,6 @@ class WordPost(Resource):
             "result" : "success"
         }
 
-
 @Word.route('/<int:id>')
 @Word.doc(params={'id': 'seq'})
 @Word.doc(responses={202: 'Success'})
@@ -62,9 +61,13 @@ class WordAPI(Resource):
 
     def put(self, id):
         """특정 토익 단어를 업데이트 합니다"""
-        word = request.form.get('word')
-        parts = request.form.get('parts')
-        mean = request.form.get('mean')
+        data = request.form.to_dict()
+        data = next(iter(data))
+        data = json.loads(data)
+
+        word = data.get('word')
+        parts = data.get('parts')
+        mean = data.get('mean')
 
         sql = "update word set word='%s', parts='%s', mean='%s'"%(word, parts, mean) + "where seq="+str(id)+";"
 
