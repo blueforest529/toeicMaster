@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_restx import Api, Resource
 from word import Word
 from idiom import Idiom
+from exam import Exam
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +20,7 @@ api = Api(
 
 api.add_namespace(Word, '/word')
 api.add_namespace(Idiom, '/idiom')
+api.add_namespace(Exam, '/exam')
 
 @api.route('/hello')
 class HelloWorld(Resource):

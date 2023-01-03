@@ -32,8 +32,6 @@ class WordPost(Resource):
         parts = data.get('parts')
         mean = data.get('mean')
 
-        print(word)
-
         sql = "INSERT INTO word (word, parts, mean) VALUES ('%s', '%s', '%s');" %(word, parts, mean) 
         self.cusur.execute(sql)
         self.db.commit()

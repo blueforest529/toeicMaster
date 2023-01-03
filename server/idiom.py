@@ -1,3 +1,4 @@
+import json
 from flask import request, jsonify
 from flask_restx import Resource, Namespace
 import databases
@@ -22,8 +23,12 @@ class IdiomPost(Resource):
   
     def post(self):
         """토익 숙어를 추가합니다."""
-        idiom = request.form.get('idiom')
-        mean = request.form.get('mean')
+        data = request.form.to_dict()
+        data = next(iter(data))
+        data = json.loads(data)
+
+        idiom = data.get('idiom')
+        mean = data.get('mean')
 
         sql = "INSERT INTO idiom (idiom, mean) VALUES ('%s', '%s');" %(idiom, mean) 
         self.cusur.execute(sql)
@@ -54,8 +59,12 @@ class IdiomAPI(Resource):
 
     def put(self, id):
         """특정 토익 숙어를 업데이트 합니다"""
-        idiom = request.form.get('idiom')
-        mean = request.form.get('mean')
+        data = request.form.to_dict()
+        data = next(iter(data))
+        data = json.loads(data)
+
+        idiom = data.get('idiom')
+        mean = data.get('mean')
 
         sql = "update idiom set idiom='%s', mean='%s'"%(idiom, mean) + "where seq="+str(id)+";"
 

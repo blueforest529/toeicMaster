@@ -77,7 +77,7 @@ export default {
         currentPage: 1,
         totalRows: 1,
         currentPage: 1,
-        perPage: 5,
+        perPage: 10,
         pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
         fields: [
             { key: 'word', label: '단어'},

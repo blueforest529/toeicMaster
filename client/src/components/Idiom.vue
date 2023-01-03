@@ -1,95 +1,60 @@
 <template>
   <div class="container">
-    <div class="row">
-      <div>
-        <alert :message="message" v-if="showMessage"></alert>
-        <button type="button" class="btn btn-success btn-sm" v-b-modal.book-modal>Add Resource</button>
-        <br><br>
-        <!-- 
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-warning btn-sm" v-b-modal.book-update-modal @click="editBook(book)">
-                Update
-            </button>
-            <button type="button" class="btn btn-danger btn-sm" @click="onDeleteBook(book)"> 
-                Delete
-            </button>
-        </div> -->
+        <div>
+            <alert :message="message" v-if="showMessage"></alert>
+            <button type="button" class="btn btn-success btn-sm" v-b-modal.idiom-add-modal>숙어 추가</button>
+            <b-table id="my-table" :items="idioms" :fields="fields" :per-page="perPage" :current-page="currentPage" small style="width:60%; margin: auto;">
+                <template #cell(actions)="row">
+                    <button type="button" class="btn btn-warning btn-sm" @click="onEditSetting(row.item)" 
+                    v-b-modal.idiom-edit-modal style="margin-right : 15px;">
+                        수정
+                    </button>
+                    <b-button class="btn btn-warning btn-sm" @click="deleteIdiom(row.item)">
+                        삭제
+                    </b-button>
+                </template>
+            </b-table>
+        </div>
 
-        <b-table
-          id="my-table"
-          :items="volt"
-          :fields="fields"
-          :per-page="perPage"
-          :current-page="currentPage"
-          small
-          style="width:60%; margin: auto;"
-        >
-        
-        </b-table>
-<!--         
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="my-table"
-        ></b-pagination> -->
+        <b-modal ref="addIdiomModal" id="idiom-add-modal" title="숙어 추가" hide-footer>
+            <b-form @submit="onAddSubmit" @reset="onAddReset" class="w-100">
+                <b-form-group id="form-idiom-group" label="숙어 :" label-for="form-idiom-input"> 
+                    <b-form-input id="form-idiom-input" type="text" v-model="addIdiomForm.idiom" required>
+                    </b-form-input>
+                </b-form-group>
 
-      </div>
+                <b-form-group id="form-mean-group" label="뜻 :" label-for="form-mean-input" style="margin-top: 15px;">
+                    <b-form-input id="form-mean-input" type="text" v-model="addIdiomForm.mean" required>
+                    </b-form-input>
+                </b-form-group>
+
+                <b-button-group style="margin-top: 25px;">
+                    <b-button type="submit" variant="primary">저장</b-button>
+                    <b-button type="reset" variant="danger">취소</b-button>
+                </b-button-group>
+            </b-form>
+        </b-modal>
+
+        <b-modal ref="editIdiomModal" id="idiom-edit-modal" title="숙어 수정" hide-footer>
+            <b-form @submit="onEditSubmit" @reset="onEditReset" class="w-100">
+                <b-form-group id="form-idiom-group" label="숙어 :" label-for="form-idiom-input"> 
+                    <b-form-input id="form-idiom-input" type="text" v-model="editIdiomForm.idiom" placeholder=""  required>
+                    </b-form-input>
+                </b-form-group>
+
+                <b-form-group id="form-mean-group" label="뜻 :" label-for="form-mean-input" style="margin-top: 15px;">
+                    <b-form-input id="form-mean-input" type="text" v-model="editIdiomForm.mean" required>
+                    </b-form-input>
+                </b-form-group>
+
+                <b-button-group style="margin-top: 25px;">
+                    <b-button type="submit" variant="primary">저장</b-button>
+                    <b-button type="reset" variant="danger">취소</b-button>
+                </b-button-group>
+            </b-form>
+        </b-modal>
     </div>
-    
-    <b-modal ref="addBookModal" id="book-modal" title="Add a new book" hide-footer>
-        <b-form @submit="onSubmit" @reset="onReset" class="w-100">
-            <b-form-group id="form-title-group" label="Title:" label-for="form-title-input">
-                <b-form-input id="form-title-input" type="text" v-model="addBookForm.title" required placeholder="Enter title">
-                </b-form-input>
-            </b-form-group>
-
-            <b-form-group id="form-author-group" label="Author:" label-for="form-author-input">
-                <b-form-input id="form-author-input" type="text" v-model="addBookForm.author" required placeholder="Enter author">
-                </b-form-input>
-            </b-form-group>
-
-            <b-form-group id="form-read-group">
-                <b-form-checkbox-group v-model="addBookForm.read" id="form-checks">
-                <b-form-checkbox value="true">Read?</b-form-checkbox>
-                </b-form-checkbox-group>
-            </b-form-group>
-
-            <b-button-group>
-                <b-button type="submit" variant="primary">Submit</b-button>
-                <b-button type="reset" variant="danger">Reset</b-button>
-            </b-button-group>
-      </b-form>
-    </b-modal>
-
-    <b-modal ref="editBookModal" id="book-update-modal" title="Update" hide-footer>
-        <b-form @submit="onSubmitUpdate" @reset="onResetUpdate" class="w-100">
-            <b-form-group id="form-title-edit-group" label="Title:" label-for="form-title-edit-input">
-                <b-form-input id="form-title-edit-input" type="text" v-model="editForm.title" required placeholder="Enter title">
-                </b-form-input>
-            </b-form-group>
-            
-            <b-form-group id="form-author-edit-group" label="Author:" label-for="form-author-edit-input">
-                <b-form-input id="form-author-edit-input" type="text" v-model="editForm.author" required placeholder="Enter author">
-                </b-form-input>
-            </b-form-group>
-
-            <b-form-group id="form-read-edit-group">
-                <b-form-checkbox-group v-model="editForm.read" id="form-checks">
-                <b-form-checkbox value="true">Read?</b-form-checkbox>
-                </b-form-checkbox-group>
-            </b-form-group>
-
-        <b-button-group>
-            <b-button type="submit" variant="primary">Update</b-button>
-            <b-button type="reset" variant="danger">Cancel</b-button>
-        </b-button-group>
-      </b-form>
-    </b-modal>
-
-  </div>
 </template>
-
 <script>
 import axios from 'axios';
 import Alert from './Alert.vue';
@@ -97,152 +62,137 @@ import Alert from './Alert.vue';
 export default {
   data() {
     return {
-      volt: [],
-      perPage: 15,
-      currentPage: 1,
-      fields: [
-          { key: 'idiom', label: '숙어'},
-          { key: 'mean', label: '뜻'} 
-        ],
-      addBookForm: {
-        title: '',
-        author: '',
-        read: [],
-      },
-      editForm: {
-        id: '',
-        title: '',
-        author: '',
-        read: [],
-      },
-      message: '',
-      showMessage: false,
+        idioms: [],
+        perPage: 15,
+        currentPage: 1,
+        totalRows: 1,
+        currentPage: 1,
+        perPage: 10,
+        pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
+        fields: [
+            { key: 'idiom', label: '단어'},
+            { key: 'mean', label: '뜻'},
+            { key: 'actions', label: 'Actions' }
+          ],
+        addIdiomForm: {
+          idiom: '',
+          mean: ''
+        },
+        editIdiomForm: {
+          seq : 0,
+          idiom: '',
+          mean: ''
+        }, 
+        message: '',
+        showMessage: false,
     };
   },
   components: {
     alert: Alert,
   },
-  computed:{
-    rows() {
-        return this.volt.length
-    },
-    editableFields() {
-        return this.fields.filter(field => { return field.editable === true })
-    }
+  created() {
+    this.getIdioms();
   },
   methods: {
-    editItem(item) { console.log(item); },
-    getBooks() {
-        const path = 'http://192.168.43.58:5000/word';
+    getIdioms() {
+        const path = 'http://127.0.0.1:5000/idiom';
         axios.get(path)
             .then((res) => {
-                this.volt = JSON.parse(res.data.volt);
+                this.idioms = res.data;
+                console.log(this.idioms);
             })
             .catch((error) => {
-                // eslint-disable-next-line
                 console.error(error);
-            });
-    },
-    addBook(payload) {
-        const path = 'http://192.168.43.58:5000/word';
-        axios.post(path, payload)
-            .then(() => {
-                this.getBooks();
-                this.message = 'Book added!';
-                this.showMessage = true;
-            })
-            .catch((error) => {
-                // eslint-disable-next-line
-                console.log(error);
-                this.getBooks();
             });
     },
     initForm() {
-        this.addBookForm.title = '';
-        this.addBookForm.author = '';
-        this.addBookForm.read = [];
-        this.editForm.id = '';
-        this.editForm.title = '';
-        this.editForm.author = '';
-        this.editForm.read = [];
+        this.addIdiomForm.idiom = '';
+        this.addIdiomForm.mean = '';
+        this.editIdiomForm.idiom = '';
+        this.editIdiomForm.mean = '';
+        this.editIdiomForm.seq = 0;
     },
-    onSubmit(evt) {
+    onAddSubmit(evt) {
         evt.preventDefault();
-        this.$refs.addBookModal.hide();
-
-        let read = false;
-        if (this.addBookForm.read[0]) read = true;
-
-        const payload = {
-            title: this.addBookForm.title,
-            author: this.addBookForm.author,
-            read, // property shorthand
-        };
-
-        this.addBook(payload);
+        this.$refs.addIdiomModal.hide();
+        var addData = new Object() ;
+        addData.idiom = (this.addIdiomForm.idiom).toString(),
+        addData.mean = (this.addIdiomForm.mean).toString()
+        this.addIdioms(JSON.stringify(addData));
         this.initForm();
     },
-    onReset(evt) {
+    onAddReset(evt) {
         evt.preventDefault();
-        this.$refs.addBookModal.hide();
+        this.$refs.addIdiomModal.hide();
         this.initForm();
-      },
-    editBook(book) {
-        this.editForm = book;
     },
-    onSubmitUpdate(evt) {
-        evt.preventDefault();
-        this.$refs.editBookModal.hide();
-        let read = false;
-        if (this.editForm.read[0]) read = true;
-        const payload = {
-            title: this.editForm.title,
-            author: this.editForm.author,
-            read,
-        };
-
-        this.updateBook(payload, this.editForm.id);
-    },
-    updateBook(payload, bookID) {
-        const path = `http://192.168.43.58:5000/books/${bookID}`;
-        axios.put(path, payload)
+    addIdioms(addData) {
+        const path = 'http://127.0.0.1:5000/idiom';
+        axios.post(path, addData)
             .then(() => {
-                this.getBooks();
-                this.message = 'Book updated!';
-                this.showMessage = true;
+                this.getIdioms();
+                this.messageShow('단어가 추가 되었습니다.');
             })
             .catch((error) => {
-                // eslint-disable-next-line
-                console.error(error);
-                this.getBooks();
+                console.log(error);
+                this.getIdioms();
             });
-      },
-    onResetUpdate(evt) {
-        evt.preventDefault();
-        this.$refs.editBookModal.hide();
-        this.initForm();
-        this.getBooks(); // why?
     },
-    removeBook(bookID) {
-        const path = `http://192.168.43.58:5000/books/${bookID}`;
+    onEditReset(evt) {
+        evt.preventDefault();
+        this.$refs.editIdiomModal.hide();
+        this.initForm();
+    },
+    onEditSetting(item, index, evt) {
+        this.editIdiomForm.idiom = item.idiom;
+        this.editIdiomForm.mean = item.mean;
+        this.editIdiomForm.seq = item.seq;
+    },
+    onEditSubmit(evt) {
+        evt.preventDefault();
+        this.$refs.editIdiomModal.hide();
+        var editData = new Object() ;
+        editData.idiom = (this.editIdiomForm.idiom).toString(),
+        editData.mean  = (this.editIdiomForm.mean).toString()
+        this.editIdioms(JSON.stringify(editData));
+        this.initForm();
+    },
+    editIdioms(editData) {
+        const path = 'http://127.0.0.1:5000/idiom/'+this.editIdiomForm.seq;
+        axios.put(path, editData)
+            .then(() => {
+                this.getIdioms();
+                this.messageShow('단어가 수정 되었습니다.');
+            })
+            .catch((error) => {
+                console.log(error);
+                this.getIdioms();
+            });
+    },
+    deleteIdiom(item) {
+        const path = 'http://127.0.0.1:5000/idiom/'+item.seq;
         axios.delete(path)
             .then(() => {
-                this.getBooks();
-                this.message = 'Book removed!';
-                this.showMessage = true;
+                this.messageShow('단어가 삭제 되었습니다.');  
+                this.getIdioms();
             })
             .catch((error) => {
-                // eslint-disable-next-line
                 console.error(error);
-                this.getBooks();
+                this.getIdioms();
             });
     },
-    onDeleteBook(book) {
-        this.removeBook(book.id);
-    },
-  },
-  created() {
-    this.getBooks();
-  },
+    messageShow(msg) {
+        this.message = msg;
+        this.showMessage = true;
+        
+        sleep(3000).then(() => {
+            this.message = '';
+            this.showMessage = false;
+        });
+    }}
 };
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
 </script>
