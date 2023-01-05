@@ -3,7 +3,17 @@
         <div>
             <alert :message="message" v-if="showMessage"></alert>
             <button type="button" class="btn btn-success btn-sm" v-b-modal.idiom-add-modal>숙어 추가</button>
-            <b-table id="my-table" :items="idioms" :fields="fields" :per-page="perPage" :current-page="currentPage" small style="width:60%; margin: auto;">
+            <div style="width:400px; margin: auto; margin-bottom: 40px;">
+                <b-form-group label="검색" label-for="filter-input" label-cols-sm="3"
+                    label-align-sm="right" label-size="sm" class="mb-0">
+                    <b-input-group size="sm">
+                        <b-form-input id="filter-input" v-model="filter" type="search" ></b-form-input>
+                    </b-input-group>
+                </b-form-group>
+            </div>
+            <b-table id="my-table" :items="idioms" :fields="fields" :filter="filter"
+                :per-page="perPage" :current-page="currentPage" 
+                small style="width:60%; margin: auto;">
                 <template #cell(actions)="row">
                     <button type="button" class="btn btn-warning btn-sm" @click="onEditSetting(row.item)" 
                     v-b-modal.idiom-edit-modal style="margin-right : 15px;">
@@ -14,6 +24,10 @@
                     </b-button>
                 </template>
             </b-table>
+            <div style="width:400px; margin: auto; margin-top: 40px; margin-bottom: 40px;">
+                <b-pagination v-model="currentPage" :total-rows="totalRows" 
+                :per-page="perPage" align="fill" size="sm" class="my-0"></b-pagination>
+            </div>        
         </div>
 
         <b-modal ref="addIdiomModal" id="idiom-add-modal" title="숙어 추가" hide-footer>
@@ -63,12 +77,10 @@ export default {
   data() {
     return {
         idioms: [],
-        perPage: 15,
-        currentPage: 1,
         totalRows: 1,
         currentPage: 1,
         perPage: 10,
-        pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
+        filter: null,
         fields: [
             { key: 'idiom', label: '단어'},
             { key: 'mean', label: '뜻'},
@@ -84,7 +96,7 @@ export default {
           mean: ''
         }, 
         message: '',
-        showMessage: false,
+        showMessage: false
     };
   },
   components: {
@@ -99,7 +111,7 @@ export default {
         axios.get(path)
             .then((res) => {
                 this.idioms = res.data;
-                console.log(this.idioms);
+                this.totalRows = res.data.length;
             })
             .catch((error) => {
                 console.error(error);

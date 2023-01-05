@@ -1,15 +1,15 @@
 <template>
     <div style="width:30%; margin: auto;">
         <b-button-group style="margin-bottom:20px;">
-            <b-button :pressed="true" variant="success" value="0" v-on:click="changeType()" style="margin-right: 15px;"> 단어 </b-button> 
-            <b-button :pressed="false" variant="success" value="1" v-on:click="changeType()"> 뜻 </b-button>
+            <b-button :pressed="true" variant="success" value="0" v-on:click="changeType(0)" style="margin-right: 15px;"> 단어 </b-button> 
+            <b-button :pressed="false" variant="success" value="1" v-on:click="changeType(1)"> 뜻 </b-button>
         </b-button-group>
       
         <div v-show="questionIndex < length">
             <b-card style="max-width: 100%;" class="mb-2">
                 <div v-for="(item, index) in allQuestion">
                     <div v-show="index === questionIndex">
-                        <h2>{{ item }}</h2>
+                        <h2 style="margin-bottom:15px;">{{ item }}</h2>
                         <input type="text" v-on:input="updateAnswer" placeholder="답을 입력하세요">
                     </div>
                 </div>
@@ -62,7 +62,8 @@ export default {
   },
   methods: {
     changeType(e) {
-        this.type = parseInt(e.target.value);
+        this.type = parseInt(e);
+        this.reset();
     },
     updateAnswer(event) {
         this.userResponses[this.questionIndex] = event.target.value;
